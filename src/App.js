@@ -1,25 +1,53 @@
-import logo from './logo.svg';
 import './App.css';
+import React from 'react';
 
-function App() {
+const handleErrors = res => {
+  if (!res.ok) throw Error(res.statusText);
+  return res;
+};
+
+const mapCocktails = drinks => {
+  return drinks.reduce((curr, drink) => {
+    const mappedDrink = {
+      id: drink.idDrink,
+      name: drink.strDrink,
+      thumbNail: drink.strDrinkThumb,
+      category: drink.strCategory,
+      glass: drink.strGlass,
+      instructions: drink.strInstructions,
+      ingriedients: Object.keys(drink).reduce((ingriedient, key) => {
+        if (
+          (key.includes('Ingredient') && drink[key] !== null) ||
+          (key.includes('Measure') && drink[key] !== null)
+        ) {
+          ingriedient[key] = drink[key];
+        }
+        return ingriedient;
+      }, {}),
+    };
+
+    curr.push(mappedDrink);
+
+    return curr;
+  }, []);
+};
+
+const App = () => {
+  const [cocktail, setCocktail] = React.useState([]);
+  React.useEffect(() => {
+    fetch('https://www.thecocktaildb.com/api/json/v1/1/search.php?s=old')
+      .then(handleErrors)
+      .then(res => res.json())
+      .then(res => setCocktail(mapCocktails(res.drinks)))
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {console.log({ cocktail })}
+      <header className="App-header">{JSON.stringify(cocktail)}</header>
     </div>
   );
-}
+};
 
 export default App;
