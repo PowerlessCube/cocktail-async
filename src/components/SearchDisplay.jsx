@@ -1,12 +1,12 @@
 import { useCocktailSearchContext } from '../shared/CocktailSearchProvider';
-import { useGetCocktailsByName } from '../shared/useGetCocktailsByName';
+import { useFetchCocktailsByName } from '../shared/useFetchCocktailsByName';
 
 const SearchDisplay = () => {
-  const {
-    state: { cocktails, searchTerm, error },
-  } = useCocktailSearchContext();
+  useFetchCocktailsByName();
 
-  useGetCocktailsByName(searchTerm);
+  const {
+    state: { cocktails, error },
+  } = useCocktailSearchContext();
 
   return (
     <header className="App-header">

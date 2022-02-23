@@ -1,6 +1,6 @@
 import React from 'react';
 import { ACTIONS, Urls } from './constants';
-import { useCocktailSearchContext } from '../shared/CocktailSearchProvider';
+import { useCocktailSearchContext } from './CocktailSearchProvider';
 
 const handleErrors = res => {
   if (!res.ok) throw Error(res.statusText);
@@ -34,11 +34,14 @@ const mapCocktails = drinks => {
   }, []);
 };
 
-const useGetCocktailsByName = (cocktailSearch = null) => {
-  const { dispatch } = useCocktailSearchContext();
+const useFetchCocktailsByName = () => {
+  const {
+    state: { searchTerm },
+    dispatch,
+  } = useCocktailSearchContext();
 
   React.useEffect(() => {
-    fetch(Urls(cocktailSearch).COCKTAIL_SEARCH_LINK)
+    fetch(Urls(searchTerm).COCKTAIL_SEARCH_LINK)
       .then(handleErrors)
       .then(res => res.json())
       .then(({ drinks }) => {
@@ -53,7 +56,7 @@ const useGetCocktailsByName = (cocktailSearch = null) => {
           payload: err,
         });
       });
-  }, [cocktailSearch, dispatch]);
+  }, [searchTerm, dispatch]);
 };
 
-export { useGetCocktailsByName };
+export { useFetchCocktailsByName };
