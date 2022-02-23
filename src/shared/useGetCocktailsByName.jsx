@@ -1,5 +1,6 @@
-import './App.css';
 import React from 'react';
+import { ACTIONS, Urls } from './constants';
+import { useCocktailSearchContext } from '../shared/CocktailSearchProvider';
 
 const handleErrors = res => {
   if (!res.ok) throw Error(res.statusText);
@@ -7,6 +8,7 @@ const handleErrors = res => {
 };
 
 const mapCocktails = drinks => {
+  if (drinks === null) return [];
   return drinks.reduce((curr, drink) => {
     const mappedDrink = {
       id: drink.idDrink,
@@ -32,22 +34,26 @@ const mapCocktails = drinks => {
   }, []);
 };
 
-const App = () => {
-  const [cocktail, setCocktail] = React.useState([]);
+const useGetCocktailsByName = (cocktailSearch = null) => {
+  const { dispatch } = useCocktailSearchContext();
+
   React.useEffect(() => {
-    fetch('https://www.thecocktaildb.com/api/json/v1/1/search.php?s=old')
+    fetch(Urls(cocktailSearch).COCKTAIL_SEARCH_LINK)
       .then(handleErrors)
       .then(res => res.json())
-      .then(res => setCocktail(mapCocktails(res.drinks)))
-      .catch(console.error);
-  }, []);
-
-  return (
-    <div className="App">
-      {console.log({ cocktail })}
-      <header className="App-header">{JSON.stringify(cocktail)}</header>
-    </div>
-  );
+      .then(({ drinks }) => {
+        dispatch({
+          type: ACTIONS.UPDATE_COCKTAILS,
+          payload: mapCocktails(drinks),
+        });
+      })
+      .catch(err => {
+        dispatch({
+          type: ACTIONS.UPDATE_ERROR,
+          payload: err,
+        });
+      });
+  }, [cocktailSearch, dispatch]);
 };
 
-export default App;
+export { useGetCocktailsByName };
